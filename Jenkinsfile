@@ -30,7 +30,7 @@ pipeline {
                 stage('Test') {
                     steps {
                         script {
-                            bat 'mvnw.cmd test'  
+                            bat 'mvnw.cmd test' 
                         }
                     }
                 }
@@ -41,6 +41,7 @@ pipeline {
             steps {
                 script {
                     bat 'mvnw.cmd jacoco:report'  
+                }
             }
         }
 
@@ -49,5 +50,8 @@ pipeline {
                 archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
             }
         }
-    }
-}
+    }  
+} 
+
+
+
