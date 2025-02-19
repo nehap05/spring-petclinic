@@ -1,10 +1,15 @@
 pipeline {
     agent any
-    
-    triggers {
-        cron('H/10 * * * 1')
+
+    tools {
+        maven 'MAVEN3'   
+        jdk 'JAVA_HOME'     
     }
-    
+
+    triggers {
+        cron('H/10 * * * 1')  // Runs every 10 minutes on Mondays
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -17,7 +22,7 @@ pipeline {
                 stage('Build') {
                     steps {
                         script {
-                            sh './mvnw clean package -DskipTests'
+                            bat 'mvnw.cmd clean package -DskipTests'  
                         }
                     }
                 }
@@ -25,7 +30,7 @@ pipeline {
                 stage('Test') {
                     steps {
                         script {
-                            sh './mvnw test'
+                            bat 'mvnw.cmd test'  
                         }
                     }
                 }
@@ -35,8 +40,7 @@ pipeline {
         stage('Code Coverage') {
             steps {
                 script {
-                    sh './mvnw jacoco:report' 
-                }
+                    bat 'mvnw.cmd jacoco:report'  
             }
         }
 
