@@ -1,46 +1,48 @@
 pipeline {
     agent any
-
+    
     triggers {
-        cron('H/10 * * * 1')  // Runs every 10 minutes on Mondays
+        cron('H/10 * * * 1')
     }
-
-    tools {
-        maven 'MAVEN3'   
-        jdk 'JAVA_HOME'      
-    }
-
+    
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/nehap05/spring-petclinic.git'
+                git branch: 'main', url: 'https://github.com/nehap05/spring-petclinic.git'
             }
         }
 
-        stage('Build') {
-            steps {
-                sh 'mvn clean package'
+        stage('Build and Test') {
+            parallel {
+                stage('Build') {
+                    steps {
+                        script {
+                            sh './mvnw clean package -DskipTests'
+                        }
+                    }
+                }
+
+                stage('Test') {
+                    steps {
+                        script {
+                            sh './mvnw test'
+                        }
+                    }
+                }
             }
         }
 
         stage('Code Coverage') {
             steps {
-                sh 'mvn jacoco:prepare-agent test jacoco:report'
-            }
-            post {
-                always {
-                    jacoco execPattern: '**/target/jacoco.exec', 
-                           classPattern: '**/target/classes', 
-                           sourcePattern: '**/src/main/java', 
-                           inclusionPattern: '**/*.class', 
-                           exclusionPattern: ''
+                script {
+                    sh './mvnw jacoco:report' 
                 }
             }
         }
 
         stage('Archive Artifact') {
             steps {
-                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+                archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
             }
         }
     }
